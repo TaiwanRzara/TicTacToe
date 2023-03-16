@@ -126,8 +126,10 @@ inline int assess()
 int ab(int a, int b, int x, int y, int depth, char ox)
 {
     int result = assess(), score;
-    if (!--depth || result == 1000000 || result == -1000000 || is_full())
+    if (!--depth || result == 1000000 || result == -1000000)
         return result;
+    if (is_full())
+        return 0;
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -182,6 +184,29 @@ int main()
             board[i][j] = '.';
         }
     }
-    cout << "test";
+    char ox = 'X';
+    // we are 'X', the computer is 'O'
+    while (!is_full() && assess() != 1000000 && assess() != -1000000)
+    {
+        int x, y;
+        print();
+        cin >> x >> y;
+        board[x][y] = 'X';
+        if (assess() == -1000000)
+        {
+            print();
+            cout << "you win";
+            return 0;
+        }
+        int bests = best();
+        board[bests / 3][bests % 3] = 'O';
+        if (assess() == 1000000)
+        {
+            print();
+            cout << "you lose";
+            return 0;
+        }
+    }
+    cout << "tie";
     return 0;
 }
