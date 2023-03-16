@@ -15,9 +15,9 @@ struct TTT{
         string str="";
         for(int y=0;y<3;y++){
             for(int x=0;x<3;x++){
-                string+=BC[Broad[x][y]];
+                str+=BC[Broad[x][y]];
             }
-            string+="\n";
+            str+="\n";
         }
         return str;
     }
@@ -46,7 +46,7 @@ struct TTT{
     }
     int evaluate(){
         int score=Winner();
-        if(score) return score*
+        if(score) return score;
     }
 };
 int main(){
