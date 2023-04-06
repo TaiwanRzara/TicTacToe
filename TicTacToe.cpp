@@ -46,7 +46,9 @@ struct TTT{
     }
     int evaluate(){
         int score=Winner();
-        if(score) return score;
+        if(score--) return (-1+2*score)*100;
+        score=0;
+        
     }
 };
 int main(){
