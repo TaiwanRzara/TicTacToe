@@ -45,7 +45,7 @@ inline int assess() {
             slides[0][1]++;
         if (board[i][2 - i] == 'O')
             slides[1][0]++;
-        else if (board[i][2 - 1] == 'X')
+        else if (board[i][2 - i] == 'X')
             slides[1][1]++;
     }
     int result = 0;
