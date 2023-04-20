@@ -161,6 +161,3 @@ void play(){
 }
 
 
-int main(){
-    play();
-}
