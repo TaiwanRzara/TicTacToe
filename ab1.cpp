@@ -2,9 +2,9 @@
 
 using namespace std;
 const string BC[]={".","O","X"};
-const int value[]={1000,10};
+const int value[]={1000,10,100,1000,1};
 const int mod=1e9+7;
-const int depth_limit=3;
+const int depth_limit=4;
 
 inline int people(int n){return (n==2)?-1:(n==1?1:0);}
 inline void ERROR(void){
@@ -96,7 +96,40 @@ inline int evaluate(TTT T){
         if(T.Broad[i][0]==T.Broad[i][2]&&T.Broad[i][1]==0) score+=people(T.Broad[i][0])*value[1];
         if(T.Broad[0][i]==T.Broad[2][i]&&T.Broad[1][i]==0) score+=people(T.Broad[0][i])*value[1];
     }
-    //cout<<score<<endl;
+    return score;
+}
+
+inline int evaluate2(TTT T){
+    int score=0,winner=T.Winner();
+    if(winner>=0) return value[0]*people(winner);
+    else if(winner==0) return 0;
+    for(int c[2]={0,0},y=0;y<3;y++,c[0]=c[1]=0){
+        for(int x=0;x<3;x++){
+            if(T.Broad[x][y]) c[T.Broad[x][y]&1]++;
+        }
+        if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
+            score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+    }
+    for(int c[2]={0,0},x=0;x<3;x++,c[0]=c[1]=0){
+        for(int y=0;y<3;y++){
+            if(T.Broad[x][y]) c[T.Broad[x][y]&1]++;
+        }
+        if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
+            score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+    }
+    int c[2]={0,0};
+    if(T.Broad[0][0]) c[T.Broad[0][0]&1]++;
+    if(T.Broad[1][1]) c[T.Broad[1][1]&1]++;
+    if(T.Broad[2][2]) c[T.Broad[2][2]&1]++;
+    if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
+        score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+    c[0]=c[1]=0;
+    if(T.Broad[0][2]) c[T.Broad[0][2]&1]++;
+    if(T.Broad[1][1]) c[T.Broad[1][1]&1]++;
+    if(T.Broad[2][0]) c[T.Broad[2][0]&1]++;
+    if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
+        score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+    if(score>value[0]) score=value[0];
     return score;
 }
 
@@ -105,17 +138,28 @@ pair<int,int> AB(TTT &T,int player,int depth=depth_limit,int a=-mod,int b=mod){
     if(winner>=0)//game end;
         return {-1,people(winner)*people(player)*value[0]};
     else if(depth==1)//lowest depth
-        return {-1,evaluate(T)*people(player)};
+        return {-1,evaluate2(T)*people(player)};
     int bx=-1,by=-1,score=0;
     for(int y=0;y<3;y++) for(int x=0;x<3;x++){
         if(T.Broad[x][y]) continue;
         T.put(x,y,player);
-        score=-AB(T,player^3,depth-1,-b,-a).second;
+        score=-AB(T,player^3,depth-1,-b,-a).second-value[4];
         if(T.pick(x,y,player));
         if(score>=b) return {-1,b};
         if(score>a) a=score,bx=x,by=y;
     }
-    if(bx==-1) cout<<"ERROR"<<depth<<endl;
+    if(bx==-1){
+        cout<<"ERROR("<<a<<","<<b<<")"<<depth<<"\t"<<player<<endl<<T<<endl;
+        cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+        for(int y=0;y<3;y++) for(int x=0;x<3;x++){
+            if(T.Broad[x][y]) continue;
+            T.put(x,y,player);
+            score=evaluate2(T)*people(player);
+            cout<<">>>"<<score<<endl<<T<<endl;
+            if(T.pick(x,y,player));
+        }
+        cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
+    }
     return {bx+by*3,a};
 }
 
@@ -143,6 +187,7 @@ void play(){
         cout<<player<<endl;
         if(player&mode){
             move=AB(TicTacToe,player).first;
+            if(move==-1) cout<<"ERROR\n";
             if(!TicTacToe.put(move%3,move/3,player)) cout<<"ERROR"<<endl;
         }
         else{
@@ -159,5 +204,3 @@ void play(){
     cout<<TicTacToe;
     cout<<"Winner"<<TicTacToe.Winner()<<endl;
 }
-
-
