@@ -2,37 +2,55 @@
 
 using namespace std;
 const string BC[]={".","O","X"};
-const int value[]={1000,10,100,1000,1};
+const int value[]={1000,1,11,121,1331};
 const int mod=1e9+7;
-const int depth_limit=5;
-
+const int len=4;
+const int depth_limit=10000;
+inline int change_player(int n){return n^3;}
 inline int people(int n){return (n==2)?-1:(n==1?1:0);}
 inline void ERROR(void){
     cout<<"\nERROR\n\n\n";
     return ;
 }
 struct TTT{
-    int Broad[3][3]={0};
+    int Broad[len][len]={0};
     int filled=0;
-    int Player=1;
     TTT(){
         for(auto &x:Broad) for(int &b:x) b=0;
         filled=0;
-        Player=1;
         return ;
     }
     int Winner(){
-        for(int s=0;s<3;s++){
-            if(Broad[s][0]==Broad[s][1]&&Broad[s][1]==Broad[s][2]&&Broad[s][0]!=0) return Broad[s][0];
-            if(Broad[0][s]==Broad[1][s]&&Broad[1][s]==Broad[2][s]&&Broad[0][s]!=0) return Broad[0][s];
+        int winner;
+        for(int y=0;y<len;y++){
+            winner=Broad[0][y];
+            for(int x=1;x<len&&winner;x++){
+                if(winner!=Broad[x][y]) winner=0;
+            }
+            if(winner) return winner;
         }
-        if(Broad[0][0]==Broad[1][1]&&Broad[1][1]==Broad[2][2]&&Broad[1][1]!=0) return Broad[1][1];
-        if(Broad[2][0]==Broad[1][1]&&Broad[1][1]==Broad[0][2]&&Broad[1][1]!=0) return Broad[1][1];
-        if(filled==9) return 0;
+        for(int x=0;x<len;x++){
+            winner=Broad[x][0];
+            for(int y=1;y<len&&winner;y++){
+                if(winner!=Broad[x][y]) winner=0;
+            }
+            if(winner) return winner;
+        }
+        winner=Broad[0][0];
+        for(int s=1;s<len&&winner;s++){
+            if(winner!=Broad[s][s]) winner=0;
+        }
+        if(winner) return winner;
+        winner=Broad[len-1][0];
+        for(int s=1;s<len;s++){
+            if(winner!=Broad[len-1-s][s]) winner=0;
+        }
+        if(winner) return winner;
+        if(filled==len*len) return 0;
         return -1;
     }
     bool put(int x,int y,int player){
-        if(x>=3||y>=3||x<0||y<0||player<1||player>2) return false;
+        if(x>=len||y>=len||x<0||y<0||player<1||player>2) return false;
         if(Broad[x][y]!=0) return false;
         Broad[x][y]=player;
         filled++;
@@ -41,20 +59,19 @@ struct TTT{
     void clear(void){
         for(auto &row:Broad) for(int &i:row) i=0;
         filled=0;
-        Player=1;
         return;
     }
     bool pick(int x,int y,int player){
-        if(x>=3||y>=3||x<0||y<0||player<1||player>2) return false;
+        if(x>=len||y>=len||x<0||y<0||player<1||player>2) return false;
         if(Broad[x][y]!=player) return false;
         Broad[x][y]=0;
         filled--;
         return true;
     }
-    friend ostream &operator<<(ostream &s, TTT &T){
+    friend ostream &operator<<(ostream &s,const TTT &T){
         string str="";
-        for(int y=0;y<3;y++){
-            for(int x=0;x<3;x++){
+        for(int y=0;y<len;y++){
+            for(int x=0;x<len;x++){
                 str+=BC[T.Broad[x][y]];
             }
             str+="\n";
@@ -63,11 +80,12 @@ struct TTT{
         return s;
     }
     friend istream &operator>>(istream &s,TTT &T){
-        char w[9];
+        const int len2=len*len;
+        char w[len2];
         for(char &i:w) s>>i;
-        for(int p=0;p<9;p++){
-            if(w[p]=='O') T.put(p%3,p/3,1);
-            else if(w[p]=='X') T.put(p%3,p/3,2);
+        for(int p=0;p<len2;p++){
+            if(w[p]=='O') T.put(p%len,p/len,1);
+            else if(w[p]=='X') T.put(p%len,p/len,2);
             else if(w[p]=='.') ;
             else{
                 ERROR();
@@ -82,33 +100,36 @@ inline int evaluate(TTT T){
     int score=0,winner=T.Winner();
     if(winner>=0) return value[0]*people(winner);
     else if(winner==0) return 0;
-    for(int c[2]={0,0},y=0;y<3;y++,c[0]=c[1]=0){
-        for(int x=0;x<3;x++){
-            if(T.Broad[x][y]) c[T.Broad[x][y]&1]++;
+    for(int count[2]={0,0},y=0;y<len;y++,count[0]=count[1]=0){
+        for(int x=0;x<len;x++){
+            if(T.Broad[x][y]) count[T.Broad[x][y]&1]++;
         }
-        if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
-            score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+        if((count[0]==0||count[1]==0)&&count[0]+count[1]) 
+            score+=value[max(count[0],count[1])]*(count[0]?-1:1);
     }
-    for(int c[2]={0,0},x=0;x<3;x++,c[0]=c[1]=0){
-        for(int y=0;y<3;y++){
-            if(T.Broad[x][y]) c[T.Broad[x][y]&1]++;
+
+    for(int count[2]={0,0},x=0;x<len;x++,count[0]=count[1]=0){
+        for(int y=0;y<len;y++){
+            if(T.Broad[x][y]) count[T.Broad[x][y]&1]++;
         }
-        if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
-            score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+        if((count[0]==0||count[1]==0)&&count[0]+count[1]) 
+            score+=value[max(count[0],count[1])]*(count[0]?-1:1);
     }
-    int c[2]={0,0};
-    if(T.Broad[0][0]) c[T.Broad[0][0]&1]++;
-    if(T.Broad[1][1]) c[T.Broad[1][1]&1]++;
-    if(T.Broad[2][2]) c[T.Broad[2][2]&1]++;
-    if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
-        score+=value[max(c[0],c[1])]*(c[0]?-1:1);
-    c[0]=c[1]=0;
-    if(T.Broad[0][2]) c[T.Broad[0][2]&1]++;
-    if(T.Broad[1][1]) c[T.Broad[1][1]&1]++;
-    if(T.Broad[2][0]) c[T.Broad[2][0]&1]++;
-    if((c[0]==0||c[1]==0)&&c[0]+c[1]) 
-        score+=value[max(c[0],c[1])]*(c[0]?-1:1);
+    int count[2]={0,0};
+    if(T.Broad[0][0]) count[T.Broad[0][0]&1]++;
+    if(T.Broad[1][1]) count[T.Broad[1][1]&1]++;
+    if(T.Broad[2][2]) count[T.Broad[2][2]&1]++;
+    if((count[0]==0||count[1]==0)&&count[0]+count[1]) 
+        score+=value[max(count[0],count[1])]*(count[0]?-1:1);
+
+    count[0]=count[1]=0;
+    if(T.Broad[0][2]) count[T.Broad[0][2]&1]++;
+    if(T.Broad[1][1]) count[T.Broad[1][1]&1]++;
+    if(T.Broad[2][0]) count[T.Broad[2][0]&1]++;
+    if((count[0]==0||count[1]==0)&&count[0]+count[1]) 
+        score+=value[max(count[0],count[1])]*(count[0]?-1:1);
     if(score>value[0]) score=value[0];
+
     return score;
 }
 
@@ -119,24 +140,24 @@ pair<int,int> AB(TTT &T,int player,int depth=depth_limit,int a=-mod,int b=mod){
     else if(depth==1)//lowest depth
         return {-1,evaluate(T)*people(player)};
     int bx=-1,by=-1,score=0;
-    for(int y=0;y<3;y++) for(int x=0;x<3;x++){
+    for(int y=0;y<len;y++) for(int x=0;x<len;x++){
         if(T.Broad[x][y]) continue;
         T.put(x,y,player);
-        score=-AB(T,player^3,depth-1,-b,-a).second-value[4];
+        score=-AB(T,change_player(player),depth-1,-b,-a).second;
         if(T.pick(x,y,player));
         if(score>=b) return {-1,b};
         if(score>a) a=score,bx=x,by=y;
     }
     if(bx==-1) return {-1,a};
-    return {bx+by*3,a};
+    return {bx+by*len,a};
 }
 
 void play(){
     TTT TicTacToe;
-    int mode,move,mx,my;
+    int mode,move,mx,my,len2=len*len;
     cout<<"please input [0:player&player,1:computer&player,2:player&computer] ";
     cin>>mode;
-    for(int x,y,player=1;TicTacToe.filled<9;player^=3){
+    for(int x,y,player=1;TicTacToe.filled<len2;player=change_player(player)){
         cout<<TicTacToe<<endl;
         if(TicTacToe.Winner()>=0){
             cout<<"game end"<<endl;
@@ -146,7 +167,7 @@ void play(){
         if(player&mode){
             move=AB(TicTacToe,player).first;
             if(move==-1) cout<<"ERROR\n";
-            if(!TicTacToe.put(move%3,move/3,player)) cout<<"ERROR"<<endl;
+            if(!TicTacToe.put(move%len,move/len,player)) cout<<"ERROR"<<endl;
         }
         else{
             cout<<"player "<<BC[player]<<" input"<<endl;
