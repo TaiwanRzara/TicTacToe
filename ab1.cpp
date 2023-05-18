@@ -75,35 +75,34 @@ struct TTT {
 		filled--;
 		return true;
 	}
-	friend ostream &operator<<(ostream &s, const TTT &T) {
-		string str = "";
-		for (int y = 0; y < len; y++) {
-			for (int x = 0; x < len; x++) {
-				str += BC[T.Board[x][y]];
-			}
-			str += "\n";
-		}
-		s << str;
-		return s;
-	}
-	friend istream &operator>>(istream &s, TTT &T) {
-		const int len2 = len * len;
-		char w[len2];
-		for (char &i : w) s >> i;
-		for (int p = 0; p < len2; p++) {
-			if (w[p] == 'O') T.put(p % len, p / len, 1);
-			else if (w[p] == 'X') T.put(p % len, p / len, 2);
-			else if (w[p] == '.')
-				;
-			else {
-				ERROR();
-				return s;
-			}
-		}
-		return s;
-	}
 };
-
+ostream &operator<<(ostream &s, const TTT &T) {
+	string str = "";
+	for (int y = 0; y < len; y++) {
+		for (int x = 0; x < len; x++) {
+			str += BC[T.Board[x][y]];
+		}
+		str += "\n";
+	}
+	s << str;
+	return s;
+}
+istream &operator>>(istream &s, TTT &T) {
+	const int len2 = len * len;
+	char w[len2];
+	for (char &i : w) s >> i;
+	for (int p = 0; p < len2; p++) {
+		if (w[p] == 'O') T.put(p % len, p / len, 1);
+		else if (w[p] == 'X') T.put(p % len, p / len, 2);
+		else if (w[p] == '.')
+			;
+		else {
+			ERROR();
+			return s;
+		}
+	}
+	return s;
+}
 inline int evaluate(TTT T) {
 	int score = 0, winner = T.Winner();
 	if (winner >= 0) return value[0] * people(winner);
