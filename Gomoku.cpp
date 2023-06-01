@@ -1,11 +1,12 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
 
 using namespace std;
 const string BC[] = {".", "O", "X"};
 const int value[] = {0, 1, 100, 10000, 1000000, 10000000};
 const int mod = 1e9 + 7;
 const int len = 10;
-const int depth_limit = 5;
+const int depth_limit = 4;
 const int line = 5;
 int t;
 inline int change_player(int n) {
