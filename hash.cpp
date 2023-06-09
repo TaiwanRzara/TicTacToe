@@ -1,8 +1,6 @@
-#include <bitset>
 #include <iostream>
 #include <utility>
 #include <vector>
-using std::bitset;
 using std::cin;
 using std::cout;
 using std::pair;
