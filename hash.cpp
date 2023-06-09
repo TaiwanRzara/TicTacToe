@@ -1,77 +1,56 @@
 #include <iostream>
 #include <utility>
+#include <vector>
 using std::cin;
 using std::cout;
 using std::pair;
+using std::vector;
 typedef pair<unsigned long long, unsigned long long> pll;
 const int len = 10;
 int board[len][len];
+typedef pair<int, int> pos;
+typedef pair<int, int> dpos;
+const dpos fdx = {1, 0}, bdx = {-1, 0}, fdy = {0, 1}, bdy = {0, -1};
+const pos lu = {0, 0}, ru = {len - 1, 0}, lb = {0, len - 1}, rb = {len - 1, len - 1};
+const pair<dpos, dpos> mov[] = {
+    {fdx, fdy},
+    {fdy, fdx},
+    {bdx, fdy},
+    {fdy, bdx},
+    {fdx, bdy},
+    {bdy, fdx},
+    {bdx, bdy},
+    {bdy, bdx}};
+const pos start[] = {lu, lu, ru, ru, lb, lb, rb, rb};
 pll hash() {
     int chance = (1 << 9) - 1;
-    int cur;
-    int type = -1;
-    for (int j = 0; j < len; j++) {
-        for (int i = 0; i < len; i++) {
+    pos cur_pos[8];
+    int cur, flag;
+    for (int i = 0; i < 8; i++) cur_pos[i] = start[i];
+    for (int i = 0; i < len; i++) {
+        for (int j = 0; j < len; j++) {
             cur = 2;
-            if (chance & 0b1) {  // 由左而右，由上而下
-                if (board[i][j] < cur)
-                    cur = board[i][j];
-                else if (board[i][j] > cur)
-                    chance ^= 0b1;
+            flag = 0;
+            for (int k = 0; k < 8; k++) {
+                if (!(chance & (1 << k))) continue;
+                flag++;
+                if (board[cur_pos[k].first][cur_pos[k].second] < cur)
+                    chance &= (1 << 9) - 1 ^ ((1 << k) - 1);
+                else if (board[cur_pos[k].first][cur_pos[k].second] > cur)
+                    chance ^= 1 << k;
             }
-            if (chance & 0b10) {  // 由上而下，由左而右
-                if (board[j][i] < cur)
-                    cur = board[j][i], chance &= 0b11111110;
-                else if (board[j][i] > cur) {
-                    chance ^= 0b10;
-                }
+            for (int k = 0; k < 8; k++) {
+                cur_pos[k].first += mov[k].first.first;
+                cur_pos[k].second += mov[k].first.second;
             }
-            if (chance & 0b100) {  // 由右而左，由上而下
-                if (board[len - i - 1][j] < cur)
-                    cur = board[len - i - 1][j], chance &= 0b11111100;
-                else if (board[len - i - 1][j] > cur)
-                    chance ^= 0b100;
-            }
-            if (chance & 0b1000) {  // 由上而下，由右而左
-                if (board[len - j - 1][i] < cur)
-                    cur = board[len - j - 1][i], chance &= 0b11111000;
-                else if (board[len - j - 1][i] > cur)
-                    chance ^= 0b1000;
-            }
-            if (chance & 0b10000) {  // 由左而右，由下而上
-                if (board[i][len - j - 1] < cur)
-                    cur = board[i][len - j - 1], chance &= 0b11110000;
-                else if (board[i][len - j - 1] > cur)
-                    chance ^= 0b10000;
-            }
-            if (chance & 0b100000) {  // 由下而上，由左而右
-                if (board[j][len - i - 1] < cur)
-                    cur = board[j][len - i - 1], chance &= 0b11100000;
-                else if (board[j][len - i - 1] > cur)
-                    chance ^= 0b100000;
-            }
-            if (chance & 0b1000000) {  // 由右而左，由下而上
-                if (board[len - i - 1][len - j - 1] < cur)
-                    cur = board[len - i - 1][len - j - 1], chance &= 0b11000000;
-                else if (board[len - i - 1][len - j - 1] > cur)
-                    chance ^= 0b1000000;
-            }
-            if (chance & 0b10000000) {  // 由下而上，由右而左
-                if (board[len - j - 1][len - i - 1] < cur)
-                    cur = board[len - j - 1][len - i - 1], chance &= 0b10000000;
-                else if (board[len - j - 1][len - i - 1] > cur)
-                    chance ^= 0b10000000;
-            }
-            for (int k = 1, l = 0; l < 8; l++, k <<= 1) {
-                if (chance == k) {
-                    type = l;
-                    break;
-                }
-            }
-            if (type != -1) break;
+            if (flag <= 1) break;
+        }
+        if (flag <= 1) break;
+        for (int k = 0; k < 8; k++) {
+            cur_pos[k].first += mov[k].second.first;
+            cur_pos[k].second += mov[k].second.second;
         }
     }
-    return {0, 0};
 }
 int main() {
     return 0;
